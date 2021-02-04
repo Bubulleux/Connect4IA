@@ -10,7 +10,7 @@ game : motor.Connect4= motor.Connect4(0)
 nbr_action=7
 
 gamma=tf.constant(0.98)
-epoch=100000
+epoch=20000
 best_score=0
 
 epsilon=1.
@@ -21,8 +21,9 @@ epsilon_decay_value=epsilon/(end_epsilon-start_epsilon)
 
 def GetModel():
   entree=layers.Input(shape=(42), dtype='float32')
-  result=layers.Dense(30, activation='relu')(entree)
-  result=layers.Dense(30, activation='relu')(result)
+  result=layers.Dense(50, activation='relu')(entree)
+  result=layers.Dense(50, activation='relu')(result)
+  result=layers.Dense(50, activation='relu')(result)
   sortie=layers.Dense(nbr_action)(result)
     
   model=models.Model(inputs=entree, outputs=sortie)

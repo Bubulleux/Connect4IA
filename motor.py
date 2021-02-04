@@ -3,7 +3,6 @@ import ia
 import colorama
 import numpy.matlib as np
 import time
-import Train
 
 class Connect4():
     plyTurn = -1
