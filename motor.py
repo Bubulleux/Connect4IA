@@ -1,12 +1,13 @@
 import display
 import ia
-import colorama
+from colorama import Back
 import numpy.matlib as np
 import time
 
 class Connect4():
     plyTurn = -1
     win = 0
+    plyStart = 0
     #board = [[0 for y in range(6)] for x in range(7)]
     board : np.matrix= np.zeros((7,6), dtype="int8")
     
@@ -26,10 +27,11 @@ class Connect4():
         #     [ 0,  0,  0,  0, -1, -1],
         # ])
         self.win = 0
-        self.plyTurn = -1
+        self.plyStart = -1 if np.random.rand() > 0.5 else 1
+        self.plyTurn = self.plyStart
         if showBoard:
             self.visualBoard = display.VisualBoard()
-            self.visualBoard.updateAll(self.board)
+            self.visualBoard.update_all(self.board)
     
     def dropCoin(self, x, color):
         for i in range(6):
@@ -39,29 +41,32 @@ class Connect4():
                 #print(f"i: {i}")
                 if self.visualBoard != None:
                     #self.visualBoard.updateCell(x , y, color)
-                    self.visualBoard.updateAll(self.board)
+                    self.visualBoard.update_all(self.board)
                 break
     
     
-                
-    
     def Play(self, playColumn):
         if self.board[playColumn, 0] != 0 and self.win == 0:
-            return self.Observation(), -1, True
+            return self.Observation(), -10, True
         self.dropCoin(playColumn, self.plyTurn)
         win = winPlay(self.board, playColumn)
         if win:
             self.win = self.plyTurn
         else:
             self.plyTurn *= -1
-        return self.Observation(), 10 if win else 0, win
+        return self.Observation(), 10 if win and self.plyTurn != self.plyStart else 0, win
     
     def CloseGame(self):
         if self.visualBoard != None:
-            self.visualBoard.Close()
+            self.visualBoard.close()
 
     def Observation(self):
         return self.board.copy().reshape((42,1))
+    
+    def Print(self):
+        print()
+        Printboard(self.board)
+
     
     
 def winPlay(board, playCol):
@@ -95,7 +100,9 @@ def winPlay(board, playCol):
 
 def Printboard(board):
         for y in range(6):
-            pr = ""
-            for x in range(7):
-                pr = pr + str(board[x,y]) +  "   "
-            print(pr)
+            for i in range(2):
+                pr = ""
+                for x in range(7):
+                    color = Back.YELLOW if board[x, y] == 1 else Back.RED if board[x, y] == -1 else Back.WHITE
+                    pr = pr + f"{color}    {Back.RESET}"
+                print(pr)

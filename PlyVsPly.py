@@ -1,6 +1,7 @@
 import motor
 
-def LancheGame():
+
+def launch_game():
     connect4 = motor.Connect4()
     while connect4.win == 0:
         connect4.Play(int(input("play: ")))
