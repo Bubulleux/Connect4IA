@@ -14,7 +14,7 @@ class Play():
     def calcPlay(self, board, x, team):
         self.team = team
         self.board = playHere(board, x, team)
-        self.win = motor.winPlay(self.board.copy(), x)
+        self.win = motor.win_play(self.board.copy(), x)
         self.x = x
         self.winRate = 0
         self.playAfter = []

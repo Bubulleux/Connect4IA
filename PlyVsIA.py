@@ -8,12 +8,12 @@ def launch_game():
 	connect4 = motor.Connect4()
 	while connect4.win == 0:
 		if connect4.plyTurn == -1:
-			connect4.Play(int(input("play: ")))
+			connect4.play(int(input("play: ")))
 		else:
-			observations = connect4.Observation() * connect4.plyTurn
+			observations = connect4.observation() * connect4.plyTurn
 			value_q = model(np.expand_dims(observations, axis=0))
 			action = int(tf.argmax(value_q[0], axis=-1))
-			connect4.Play(action)
+			connect4.play(action)
 	print("Game End")
 	input()
-	connect4.CloseGame()
+	connect4.close_game()

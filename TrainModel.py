@@ -1,13 +1,13 @@
 import motor
 import tensorflow as tf
-from tensorflow.keras import models, layers
+from tensorflow.keras import layers
 import numpy as np
 import time
 
 nbr_action = 7
 
 gamma = tf.constant(0.98)
-epoch = 100000
+epoch = 10 * (10 ** 5)
 best_score = 0
 
 epsilon = 1.
@@ -20,11 +20,11 @@ epsilon_decay_value = epsilon / (end_epsilon - start_epsilon)
 def get_model():
 	entree = layers.Input(shape=42, dtype='float32')
 	result = entree
-	for i in range(6):
-		result = layers.Dense(200, activation='relu')(result)
+	for i in range(4):
+		result = layers.Dense(100, activation='relu')(result)
 	sortie = layers.Dense(nbr_action)(result)
 
-	return models.Model(inputs=entree, outputs=sortie)
+	return tf.keras.models.Model(inputs=entree, outputs=sortie)
 
 
 def my_loss(target_q, predicted_q):
@@ -50,12 +50,16 @@ def train_step(reward, action, observation, next_observation, done):
 	train_loss(loss)
 
 
-def train():
+def train(load=False, debug_board=True):
 	global epsilon, best_score, model, train_loss
-	model = get_model()
+	if load:
+		model = model = tf.keras.models.load_model("Connect4Model")
+	else:
+		model = get_model()
 	train_loss = tf.keras.metrics.Mean()
 	last_time = time.time()
-	for e in range(epoch):
+	e = 0
+	while e < epoch or epoch == -1:
 		score = 0
 		tab_observations = [[], []]
 		tab_rewards = [[], []]
@@ -67,8 +71,8 @@ def train():
 			time_need = (time.time() - last_time)
 			print(f"e: {e}, epsilon: {epsilon}, time: {(ops_left * (time_need / 500)) / 60} m")
 			last_time = time.time()
-		game = motor.Connect4(showBoard=False)
-		observations = game.Observation()
+		game = motor.Connect4(show_board=False)
+		observations = game.observation()
 		while True:
 			ply = (game.plyTurn + 1) // 2
 			tab_observations[ply].append(observations)
@@ -77,7 +81,7 @@ def train():
 				action = int(tf.argmax(value_q[0], axis=-1))
 			else:
 				action = np.random.randint(0, nbr_action)
-			observations, reward, done = game.Play(action)
+			observations, reward, done = game.play(action)
 			# print(f"done: {done}, reward {reward}, action {action}")
 			observations *= game.plyTurn
 			tab_actions[ply].append(action)
@@ -88,10 +92,10 @@ def train():
 			if done:
 				tab_done[int(not ply)][-1] = True
 				break
-		if e % 200 == 0:
-			game.Print()
+		if e % 200 == 0 and debug_board:
+			game.print()
 			print(f"Start: {game.plyStart}, Win: {game.win}, reward: {tab_rewards[ply][-1]}")
-		game.CloseGame()
+		game.close_game()
 		for i in range(2):
 			tab_rewards[i] = np.array(tab_rewards[i], dtype=np.float32)
 			tab_actions[i] = np.array(tab_actions[i], dtype=np.int32)
@@ -105,10 +109,13 @@ def train():
 		epsilon = max(epsilon, epsilon_min)
 		if e % 500 == 0:
 			model.save("Connect4Model")
+		e += 1
 	model.save("Connect4Model")
 
 
 # model = get_model()
-model = tf.keras.models.load_model("Connect4Model")
 optimizer = tf.keras.optimizers.Adam(learning_rate=1E-4)
 train_loss = tf.keras.metrics.Mean()
+
+if __name__ == "__main__":
+	train(debug_board=False)
