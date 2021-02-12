@@ -44,6 +44,7 @@ class Connect4:
 
 	def play(self, play_column):
 		if self.board[play_column, 0] != 0 and self.win == 0:
+			self.win = self.plyTurn * -1
 			return self.observation(), -10, True
 		self.drop_coin(play_column, self.plyTurn)
 		win = win_play(self.board, play_column)
@@ -96,5 +97,6 @@ def print_board(board):
 			pr = ""
 			for x in range(7):
 				color = Back.YELLOW if board[x, y] == 1 else Back.RED if board[x, y] == -1 else Back.WHITE
-				pr = pr + f"{color}    {Back.RESET}"
+				pr = pr + f"{color}    {Back.RESET} "
 			print(pr)
+		print()

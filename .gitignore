@@ -3,3 +3,6 @@
 /.idea/
 /__pycache__/
 /Connect4Model BackUp/
+/output.log
+/NeatModel.pkl
+/ModelRaspberry/
